@@ -1,6 +1,7 @@
 import os
 import subprocess
 import dearpygui.dearpygui as dpg
+import asyncio
 
 def log_text(output, message): #Log text to console
     dpg.add_text(message, parent=output)
@@ -35,25 +36,35 @@ def reboot(type, isfastboot):
 """
 def unlock(log_window):
     dpg.delete_item("log", children_only=True)
-    result_fastboot_unlock = subprocess.run(["fastboot", "oem", "unlock"], capture_output=True, text=True)
-    result = result_fastboot_unlock.stdout.strip().split("\n")
-    result_err = result_fastboot_unlock.stderr.strip().split("\n")
-    for line in result:
-        log_text(log_window, line)
+    log_text(log_window, "Trying to unlock bootloader...")
+    try:
+        result_fastboot_unlock = subprocess.run(["fastboot", "oem", "unlock"], capture_output=True, text=True, timeout=10)
+        result = result_fastboot_unlock.stdout.strip().split("\n")
+        result_err = result_fastboot_unlock.stderr.strip().split("\n")
+        for line in result:
+            log_text(log_window, line)
 
-    for line in result_err:
-        log_text(log_window, line)
+        for line in result_err:
+            log_text(log_window, line)
+    except subprocess.TimeoutExpired:
+        log_text(log_window, "Unable to unlock bootloader... (fastboot command timed out)")
+
 
 def lock(log_window):
     dpg.delete_item("log", children_only=True)
-    result_fastboot_lock = subprocess.run(["fastboot", "oem", "lock"], capture_output=True, text=True)
-    result = result_fastboot_lock.stdout.strip().split("\n")
-    result_err = result_fastboot_lock.stderr.strip().split("\n")
-    for line in result:
-        log_text(log_window, line)
-        
-    for line in result_err:
-        log_text(log_window, line)
+    log_text(log_window, "Trying to lock bootloader...")
+    try:
+        result_fastboot_lock = subprocess.run(["fastboot", "oem", "lock"], capture_output=True, text=True, timeout=10)
+        result = result_fastboot_lock.stdout.strip().split("\n")
+        result_err = result_fastboot_lock.stderr.strip().split("\n")
+        for line in result:
+            log_text(log_window, line)
+            
+        for line in result_err:
+            log_text(log_window, line)
+    except subprocess.TimeoutExpired:
+        log_text(log_window, "Unable to lock bootloader... (fastboot command timed out)")
+
 """End of bootloader unlocking"""
 
 def get_info(type, log_window):

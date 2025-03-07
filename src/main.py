@@ -8,7 +8,7 @@ radio = "Normal"
 
 #DearPyGUI initialization stuff
 dpg.create_context()
-dpg.create_viewport(title="YA ADB/Fastboot GUI", width=450, height=530)
+dpg.create_viewport(title="YA ADB/Fastboot GUI", width=450, height=600)
 dpg.setup_dearpygui()
 
 #RADIO BUTTONS ONLY

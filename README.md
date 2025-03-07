@@ -4,7 +4,7 @@ Yet another adb/fastboot GUI
 # Why this
 
 Uhhhhh
-1. made in python(?)
+1. made in python
 2. made with pydeargui
 3. more or less like a side project lmao
 

@@ -28,5 +28,11 @@ But if you want to compile an executable:
 ```
 make program #To compile only for windows
 ```
+# Windows defender flagged this as malware... is this a virus???
+No, i don't even know myself why it flags it as malware (probably because of subprocess), but it isn't
+If you don't belive me, look throught the code, it's not malware
 
+# FAQ
+Q: It doesn't work (throws Access is denied)
+A: Run it as administrator
 # I DON'T TAKE RESPONSIBILITY FOR ANY BRICKED DEVICES, DEAD RAMS, EXPLOSIONS, ETC...

@@ -1,6 +1,10 @@
-import os
+from zipfile import ZipFile # Extractor
 import subprocess
 import dearpygui.dearpygui as dpg
+from posixpath import expanduser
+import os, winreg, sys
+import easygui
+import urllib.request
 
 """This is basically the backend
    I am gonna optimize this eventually, the reason i put all of the functions in here is so that
@@ -155,5 +159,83 @@ def get_devices(log_window): #Get devices both from and and fastboot
     for line in fastboot_devices_list:
         log_text(log_window, line)
 
-def shell(): #Not yet implemented...
-    os.system("adb shell")
+def add_to_path(zipname):
+    with ZipFile(zipname, 'r') as zip_ref:
+        zip_ref.extractall("platform-tools")
+    """https://github.com/matejmajny/adb-installer/blob/main/main.py"""    
+    if (os.name == "nt"): # Windows code (by Matt & Andy)
+            adb_folder = os.path.expandvars(r"%userprofile%\adb")
+            with ZipFile("win.zip", 'r') as zip_ref:
+                zip_ref.extractall(adb_folder)
+            os.remove("win.zip")
+            # Define the path to modify the PATH environment variable in the registry
+            path_to_modify = r"SYSTEM\CurrentControlSet\Control\Session Manager\Environment"
+
+            # Open the registry key for the path to modify
+            key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, path_to_modify, 0, winreg.KEY_ALL_ACCESS)
+
+            # Read the current value of the PATH environment variable
+            current_path = winreg.QueryValueEx(key, "Path")[0]
+
+            # Modify the PATH environment variable by appending a new path to it
+            new_path = adb_folder+"\\platform-tools"
+            modified_path = current_path + ";" + new_path
+
+            # Write the modified PATH environment variable back to the registry
+            winreg.SetValueEx(key, "Path", 0, winreg.REG_EXPAND_SZ, modified_path)
+
+            # Close the registry key
+            winreg.CloseKey(key)
+            easygui.msgbox(msg="Done!", title="Restart program!")
+            # Exit messages
+            
+            sys.exit(0)
+        
+    elif (os.name == "linux"): # Linux code (by dumpy), and ngl why is linux so complicated  <------(also he loves PRs)
+        path = "$PATH"
+        logoutrequired = False
+        with zipfile.ZipFile("linux.zip", 'r') as zip_ref:
+            zip_ref.extractall(expanduser("~"))
+        os.remove("linux.zip")
+        shell = os.readlink('/proc/%d/exe' % os.getppid())
+        print("Detected Shell: " + shell[shell.rfind('/')+1:])
+        if (shell.endswith("bash")):
+            with open(expanduser("~") + "/.bashrc", "r") as f:
+                    # Check if already added
+                    if (f.read().find("platform-tools") == -1):
+                        with open(expanduser("~") + "/.bashrc", "a") as f:
+                            f.write(r"export PATH=$PATH:~/platform-tools")
+                        os.system(r'source ~/.bashrc')
+                        print("Done!")
+                    else:
+                        print("Already added!")
+        elif (shell.endswith("zsh")):
+            with open(expanduser("~") + "/.zshrc", "r") as f:
+                    # Check if already added
+                    if (f.read().find("platform-tools") == -1):
+                        print("Adding to zshrc...")
+                        with open(expanduser("~") + "/.zshrc", "a") as f:
+                            f.write(r'export PATH="$PATH:~/platform-tools"')
+                        os.system(r'source ~/.zshrc')
+                        print("Done!")
+                    else:
+                        print("Already added!")
+        elif (shell.endswith("fish")):
+                with open(expanduser("~") + "/.config/fish/config.fish", "r") as f:
+                    if (f.read().find("platform-tools") == -1):
+                            print("Adding to config.fish...")
+                            with open(expanduser("~") + "/.config/fish/config.fish", "a") as f:
+                                f.write("set PATH $PATH ~/platform-tools")
+                            os.system(r'source ~/.config/fish/config.fish')
+                            print("Done!")
+                    else:
+                        print("Already added!")
+        os.system(r'chmod +x ~/platform-tools/*')
+        if (os.system(r'groups | grep plugdev') == 0):
+            easygui.msgbox(title="Done!", msg="Done! Restart program!")
+        else:
+            print("User is not in plugdev group, adding... (SUDO required)")
+            os.system(r'sudo usermod -a -G plugdev $USER')
+            logoutrequired = True
+
+    

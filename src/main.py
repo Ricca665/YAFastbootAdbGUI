@@ -1,9 +1,7 @@
 import dearpygui.dearpygui as dpg
 import subprocess
 from utils import * #Almost every single thing it does
-import easygui
-from zipfile import ZipFile
-import urllib.request
+
 
 #Default values for radio buttons
 isfastboot = False
@@ -79,26 +77,25 @@ except FileNotFoundError:
     msg = "It sesms like ADB and/or Fastboot is not installed \n Want me to install it for you?"
     if easygui.ynbox(msg, title):     # show a Continue/Cancel dialog
         try:
+            url = ""
+            zipname = ""
             if os.name == 'nt': # Windows
-                urllib.request.urlretrieve("https://dl.google.com/android/repository/platform-tools-latest-windows.zip", "win.zip")
-                with ZipFile("win.zip", 'r') as zip_ref:
-                    zip_ref.extractall(".")
-                adb_path = os.path.abspath("platform-tools")
-                subprocess.run(["setx", "PATH", f"%PATH%;{adb_path}"], shell=True)  # add adb to path permamently
+                url = "https://dl.google.com/android/repository/platform-tools-latest-windows.zip"
+                zipname = "win.zip"
             elif os.name == 'posix': # Mac OS
-                urllib.request.urlretrieve("https://dl.google.com/android/repository/platform-tools-latest-darwin.zip", "mac.zip")
-                with ZipFile("mac.zip", 'r') as zip_ref:
-                    zip_ref.extractall(".")
-                                # Detect shell
-            else: # UNIX like
-                urllib.request.urlretrieve("https://dl.google.com/android/repository/platform-tools-latest-linux.zip", "unix.zip")
-                with ZipFile("unix.zip", 'r') as zip_ref:
-                    zip_ref.extractall(".")
+                url = "https://dl.google.com/android/repository/platform-tools-latest-darwin.zip"
+                zipname = "mac.zip"
+            else: # Unix like
+                url = "https://dl.google.com/android/repository/platform-tools-latest-linux.zip"
+                zipname = "linux.zip"
+            urllib.request.urlretrieve(url, zipname)
+            add_to_path(zipname)
+            sys.exit(0)
         except Exception as e:
             easygui.msgbox(title="Error!", msg=f"An error has occured: {e}, Please report it via github issues!")
-            exit(0)
+            sys.exit(0)
     else:
-        exit(0)
+        sys.exit(0)
 #Finishing initialization by viewing our window
 dpg.show_viewport()
 dpg.set_primary_window("primary", True) #Setting it to primary

@@ -1,7 +1,7 @@
 # YAFastbootAdbGUI
 Yet another adb/fastboot GUI
 
-![ui](img/ui.png)
+![ui](img/ui2.png)
 
 
 # Why this

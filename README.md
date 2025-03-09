@@ -28,3 +28,5 @@ But if you want to compile an executable:
 ```
 make program #To compile only for windows
 ```
+
+# I DON'T TAKE RESPONSIBILITY FOR ANY BRICKED DEVICES, DEAD RAMS, EXPLOSIONS, ETC...

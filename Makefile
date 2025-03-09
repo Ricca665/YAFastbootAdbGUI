@@ -12,7 +12,7 @@ clean:
 	@$(DELETE) *.exe
 
 program:
-	@cd src && pyinstaller --onefile --windowed main.py --name="YA-ADB-Fastboot-GUI.exe" --clean
+	@cd src && pyinstaller --onefile --noconsole main.py --name="YA-ADB-Fastboot-GUI.exe" --clean
 	@$(DELETE) *.spec
 	@echo "File saved in src/dist/$(NAME)"
 
